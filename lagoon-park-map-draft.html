@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lagoon Park Map - Draft 1</title>
+<style>
+  body { font-family: -apple-system, 'Segoe UI', sans-serif; background:#F5ECD9; color:#241512; margin:0; padding:24px; }
+  h1 { font-size: 1.6rem; margin-bottom:4px; }
+  .subtitle { color:#5C4A3E; margin-top:0; margin-bottom:20px; font-size:0.95rem; }
+  .filters { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
+  .filters button {
+    border: 2px solid #6E1423; background:#fff; color:#6E1423; border-radius:20px;
+    padding:6px 14px; font-size:0.85rem; font-weight:600; cursor:pointer;
+  }
+  .filters button.active { background:#6E1423; color:#fff; }
+  .map-wrap { background:#fff; border:1px solid #DCD3BC; border-radius:8px; padding:10px; overflow:auto; }
+  svg { width:100%; height:auto; min-width:900px; }
+  .zone-label { font-size:15px; font-weight:700; font-family:Georgia, serif; }
+  .pin { cursor:pointer; transition: opacity 0.15s; }
+  .pin:hover circle { r:10; stroke-width:2.5; }
+  .pin.dim { opacity:0.12; }
+  .zone-group.dim { opacity:0.15; }
+  #tooltip {
+    position:fixed; background:#241512; color:#fff; padding:6px 10px; border-radius:4px;
+    font-size:0.85rem; pointer-events:none; display:none; z-index:50;
+  }
+  .legend { margin-top:28px; columns: 3; column-gap:28px; }
+  @media (max-width: 900px) { .legend { columns: 1; } }
+  .legend-section { break-inside: avoid; margin-bottom:20px; }
+  .legend-section h3 { font-size:1rem; border-bottom:2px solid #6E1423; padding-bottom:4px; margin-bottom:8px; }
+  .legend-section.dim { opacity:0.2; }
+  .legend ul { list-style:none; padding:0; margin:0; }
+  .legend li { font-size:0.85rem; margin-bottom:6px; line-height:1.4; }
+  .legend li.dim { opacity:0.15; }
+  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
+  .catlabel { color:#5C4A3E; font-size:0.78rem; }
+  .note { color:#8a2f2f; font-style:italic; }
+  .flag { background:#FFF3CD; border-left:4px solid #C97F00; padding:10px 14px; margin-bottom:18px; font-size:0.9rem; }
+</style>
+</head>
+<body>
+
+<h1>Lagoon Park Map — Draft 1</h1>
+<p class="subtitle">Built from 11 satellite screenshots + your official park map's grid references. This is a first pass — send the full legend list and I'll refine positions and fill in anything missing.</p>
+
+<div class="flag"><strong>Flagged for verification:</strong> This screenshot set shows <strong>Wild Kingdom Train</strong> and several other rides (Sky Scraper, Seance, Scaliwags, Musik Express, Davis Pavilion) marked "Temporarily closed" on the live map — worth confirming current status before publishing.</div>
+
+<div class="filters" id="filters">
+  <button data-filter="all" class="active">All</button>
+  <button data-filter="ride">Rides</button>
+  <button data-filter="food">Food & Drink</button>
+  <button data-filter="amenity">Amenities</button>
+  <button data-filter="lodging">Lodging</button>
+  <button data-filter="entertainment">Entertainment</button>
+</div>
+
+<div class="map-wrap">
+<svg viewBox="0 0 1100 900" xmlns="http://www.w3.org/2000/svg">
+  
+  <g class="zone-group" data-zone="entrance">
+    <rect x="20" y="260" width="210" height="340" rx="14"
+          fill="#8a8a8a22" stroke="#8a8a8a" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="30" y="282" class="zone-label" fill="#8a8a8a">Entrance / Parking</text>
+  </g>
+  <g class="zone-group" data-zone="peak">
+    <rect x="300" y="30" width="260" height="190" rx="14"
+          fill="#6E142322" stroke="#6E1423" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="310" y="52" class="zone-label" fill="#6E1423">Primordial & Cannibal Peak</text>
+  </g>
+  <g class="zone-group" data-zone="norththrill">
+    <rect x="570" y="100" width="230" height="230" rx="14"
+          fill="#B8302A22" stroke="#B8302A" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="580" y="122" class="zone-label" fill="#B8302A">North Midway & X-Venture Zone</text>
+  </g>
+  <g class="zone-group" data-zone="kiddie">
+    <rect x="280" y="270" width="290" height="200" rx="14"
+          fill="#2E6E6B22" stroke="#2E6E6B" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="290" y="292" class="zone-label" fill="#2E6E6B">Kiddieland / North Area</text>
+  </g>
+  <g class="zone-group" data-zone="beach">
+    <rect x="330" y="480" width="240" height="160" rx="14"
+          fill="#1E7FA622" stroke="#1E7FA6" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="340" y="502" class="zone-label" fill="#1E7FA6">Lagoon-A-Beach</text>
+  </g>
+  <g class="zone-group" data-zone="terraces">
+    <rect x="810" y="110" width="180" height="220" rx="14"
+          fill="#7A5A2E22" stroke="#7A5A2E" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="820" y="132" class="zone-label" fill="#7A5A2E">Terraces & Camping Cabins</text>
+  </g>
+  <g class="zone-group" data-zone="pioneer">
+    <rect x="700" y="380" width="280" height="220" rx="14"
+          fill="#7A5A2E22" stroke="#7A5A2E" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="710" y="402" class="zone-label" fill="#7A5A2E">Pioneer Village & Lagoon Lake</text>
+  </g>
+  <g class="zone-group" data-zone="southmid">
+    <rect x="280" y="610" width="350" height="170" rx="14"
+          fill="#B8302A22" stroke="#B8302A" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="290" y="632" class="zone-label" fill="#B8302A">South Midway</text>
+  </g>
+  <g class="zone-group" data-zone="rvpark">
+    <rect x="60" y="700" width="260" height="170" rx="14"
+          fill="#4A6B3A22" stroke="#4A6B3A" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="70" y="722" class="zone-label" fill="#4A6B3A">RV Park & Campground</text>
+  </g>
+  
+  <g class="pin" data-cat="ride" data-zone="peak" data-name="Cannibal" transform="translate(333.008,105.44200000000001)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="peak" data-name="Primordial" transform="translate(436.048,114.22)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="amenity" data-zone="peak" data-name="Rendezvous Gift Shop" transform="translate(332.56,158.11)">
+    <circle r="7" fill="#2E6E6B" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="peak" data-name="Coca-Cola Refreshment Station" transform="translate(488.01599999999996,130.852)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="amenity" data-zone="peak" data-name="Canyon Pavilion" transform="translate(415.664,55.854)">
+    <circle r="7" fill="#2E6E6B" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="amenity" data-zone="peak" data-name="Meadow Pavilion" transform="translate(453.296,61.397999999999996)">
+    <circle r="7" fill="#2E6E6B" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="amenity" data-zone="peak" data-name="Davis Pavilion" transform="translate(342.64,58.164)">
+    <circle r="7" fill="#2E6E6B" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="Centennial Screamer" transform="translate(638.828,220.044)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="Samurai" transform="translate(689.074,211.89600000000002)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="Sky Scraper" transform="translate(683.06,211.50799999999998)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="Paratrooper" transform="translate(614.772,125.566)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="Catapult" transform="translate(595.178,195.406)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="Double Thunder Raceway" transform="translate(724.188,230.326)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="Boomerang" transform="translate(713.13,236.14600000000002)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="Tilt-A-Whirl" transform="translate(619.816,127.506)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="Space Scrambler" transform="translate(773.4639999999999,195.988)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="Skycoaster" transform="translate(766.2860000000001,178.916)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="Seance" transform="translate(645.0360000000001,159.904)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="The Rocket" transform="translate(693.924,190.168)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="Air Race" transform="translate(712.742,273.20000000000005)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="norththrill" data-name="Sky Ride - North Station" transform="translate(741.26,186.87)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="OdySea" transform="translate(406.204,366.392)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="The Bat" transform="translate(406.966,299.152)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="Tipsy Tea Cups" transform="translate(401.88599999999997,338.18399999999997)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="Flying Tigers" transform="translate(469.704,409.032)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="Jumping Dragon" transform="translate(378.51800000000003,356.224)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="Dinosaur Drop" transform="translate(490.786,327.36)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="Moonraker" transform="translate(548.698,288.0)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="BomBora" transform="translate(363.278,325.228)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="Kontiki" transform="translate(432.62,382.3)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="The Dragonfly" transform="translate(380.55,425.432)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="Red Baron" transform="translate(395.282,450.852)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="Scaliwags" transform="translate(362.008,362.784)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="Puff the Little Fire Dragon" transform="translate(329.496,310.796)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="Carousel (Merry-Go-Round)" transform="translate(392.742,390.172)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="Baby Boats" transform="translate(318.32,389.352)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="Sky Fighter" transform="translate(426.27,400.34000000000003)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="kiddie" data-name="Dracula's Castle" transform="translate(548.952,400.012)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="entertainment" data-zone="kiddie" data-name="Interactive Water Fountain" transform="translate(313.748,312.272)">
+    <circle r="7" fill="#6E1423" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="kiddie" data-name="Arby's (North Area)" transform="translate(383.09000000000003,431.828)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="kiddie" data-name="Subway (North Area)" transform="translate(406.45799999999997,445.11199999999997)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="kiddie" data-name="Burger Express" transform="translate(478.84799999999996,319.81600000000003)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="kiddie" data-name="BeaverTails" transform="translate(523.298,314.076)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="entertainment" data-zone="kiddie" data-name="Break A Plate" transform="translate(302.318,337.692)">
+    <circle r="7" fill="#6E1423" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="amenity" data-zone="kiddie" data-name="ATM" transform="translate(299.524,333.75600000000003)">
+    <circle r="7" fill="#2E6E6B" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="amenity" data-zone="kiddie" data-name="Restroom (Kiddieland)" transform="translate(455.73400000000004,329.0)">
+    <circle r="7" fill="#2E6E6B" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="amenity" data-zone="beach" data-name="Lagoon-A-Beach entrance" transform="translate(424.704,574.6320000000001)">
+    <circle r="7" fill="#2E6E6B" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="beach" data-name="The Outrigger" transform="translate(373.908,508.29200000000003)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="beach" data-name="Wipeout" transform="translate(490.596,612.328)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="beach" data-name="Fliz/Fiiz (Beach)" transform="translate(449.18399999999997,548.468)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="beach" data-name="Icee (Beach)" transform="translate(455.304,567.688)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="beach" data-name="Smokin' Eddie's" transform="translate(472.236,584.056)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="lodging" data-zone="terraces" data-name="Cedar Terrace" transform="translate(867.312,300.22400000000005)">
+    <circle r="7" fill="#4A6B3A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="lodging" data-zone="terraces" data-name="Juniper Terrace" transform="translate(970.1279999999999,186.696)">
+    <circle r="7" fill="#4A6B3A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="lodging" data-zone="terraces" data-name="Birch Terrace" transform="translate(925.488,243.92000000000002)">
+    <circle r="7" fill="#4A6B3A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="amenity" data-zone="terraces" data-name="Terraces Restrooms" transform="translate(895.392,179.52)">
+    <circle r="7" fill="#2E6E6B" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="terraces" data-name="Time Tinker" transform="translate(848.736,154.312)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="entertainment" data-zone="terraces" data-name="The District" transform="translate(900.144,174.736)">
+    <circle r="7" fill="#6E1423" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="amenity" data-zone="terraces" data-name="Lagoon Trail trailhead" transform="translate(915.552,140.512)">
+    <circle r="7" fill="#2E6E6B" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="terraces" data-name="Rattlesnake Rapids" transform="translate(878.544,156.704)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="amenity" data-zone="pioneer" data-name="Pioneer Village entrance" transform="translate(877.576,551.824)">
+    <circle r="7" fill="#2E6E6B" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="pioneer" data-name="Olde Mill (Old Mill Grill)" transform="translate(801.936,507.296)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="pioneer" data-name="Pioneer Perk" transform="translate(856.592,491.104)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="pioneer" data-name="Grandma Christie's" transform="translate(718.0,429.096)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="entertainment" data-zone="pioneer" data-name="Pioneer Photo Gallery" transform="translate(794.128,542.44)">
+    <circle r="7" fill="#6E1423" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="pioneer" data-name="Fliz Drinks (Pioneer Village)" transform="translate(779.0,565.992)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="pioneer" data-name="Rattlesnake Grub" transform="translate(866.352,464.608)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="amenity" data-zone="pioneer" data-name="Lagoon Lake" transform="translate(939.064,506.008)">
+    <circle r="7" fill="#2E6E6B" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="southmid" data-name="Wicked" transform="translate(378.698,729.438)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="southmid" data-name="Colossus: The Fire Dragon" transform="translate(588.136,721.532)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="southmid" data-name="Wild Mouse" transform="translate(411.354,740.828)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="southmid" data-name="The Spider" transform="translate(548.258,662.706)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="southmid" data-name="Lagoon Roller Coaster" transform="translate(533.814,733.726)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="southmid" data-name="Musik Express" transform="translate(523.766,669.004)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="southmid" data-name="Turn of the Century" transform="translate(441.18399999999997,743.508)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="southmid" data-name="Tidal Wave" transform="translate(514.346,738.684)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="southmid" data-name="Rock-O-Plane" transform="translate(549.828,709.74)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="southmid" data-name="Nutcracker" transform="translate(352.322,743.91)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="southmid" data-name="Wild Kingdom Train" transform="translate(599.7539999999999,715.234)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="southmid" data-name="Biergarten Restaurant" transform="translate(366.766,628.0)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="southmid" data-name="Zeppe's Ice Cream" transform="translate(323.748,736.942)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="food" data-zone="southmid" data-name="Corndog Corner" transform="translate(399.422,634.432)">
+    <circle r="7" fill="#C97F00" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="amenity" data-zone="southmid" data-name="South Restrooms" transform="translate(423.6,695.938)">
+    <circle r="7" fill="#2E6E6B" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="ride" data-zone="southmid" data-name="Sky Ride - South Station" transform="translate(574.948,645.2860000000001)">
+    <circle r="7" fill="#B8302A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="lodging" data-zone="rvpark" data-name="Lagoon RV Park & Campground office" transform="translate(231.44,784.732)">
+    <circle r="7" fill="#4A6B3A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <g class="pin" data-cat="lodging" data-zone="rvpark" data-name="RV/camping sites (numbered lots)" transform="translate(97.488,745.604)">
+    <circle r="7" fill="#4A6B3A" stroke="#fff" stroke-width="1.5"/>
+  </g>
+</svg>
+</div>
+
+<div id="tooltip"></div>
+
+<div class="legend">
+<div class="legend-section" data-zone="entrance"><h3>Entrance / Parking</h3><ul></ul></div><div class="legend-section" data-zone="peak"><h3>Primordial & Cannibal Peak</h3><ul><li data-cat="ride" data-zone="peak"><span class="dot" style="background:#B8302A"></span><strong>Cannibal</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 8-C on official map</span></li><li data-cat="amenity" data-zone="peak"><span class="dot" style="background:#2E6E6B"></span><strong>Canyon Pavilion</strong> <span class="catlabel">(Amenity / Restroom)</span><span class="note"> — Group event pavilion</span></li><li data-cat="food" data-zone="peak"><span class="dot" style="background:#C97F00"></span><strong>Coca-Cola Refreshment Station</strong> <span class="catlabel">(Food & Drink)</span></li><li data-cat="amenity" data-zone="peak"><span class="dot" style="background:#2E6E6B"></span><strong>Davis Pavilion</strong> <span class="catlabel">(Amenity / Restroom)</span><span class="note"> — Shown temporarily closed</span></li><li data-cat="amenity" data-zone="peak"><span class="dot" style="background:#2E6E6B"></span><strong>Meadow Pavilion</strong> <span class="catlabel">(Amenity / Restroom)</span><span class="note"> — Group event pavilion</span></li><li data-cat="ride" data-zone="peak"><span class="dot" style="background:#B8302A"></span><strong>Primordial</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 2-C</span></li><li data-cat="amenity" data-zone="peak"><span class="dot" style="background:#2E6E6B"></span><strong>Rendezvous Gift Shop</strong> <span class="catlabel">(Amenity / Restroom)</span></li></ul></div><div class="legend-section" data-zone="norththrill"><h3>North Midway & X-Venture Zone</h3><ul><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>Air Race</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 4-F</span></li><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>Boomerang</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 7-E</span></li><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>Catapult</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — X-Venture, grid ref 5-C</span></li><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>Centennial Screamer</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 8-A</span></li><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>Double Thunder Raceway</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — X-Venture, grid ref 8-D</span></li><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>Paratrooper</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 6-D</span></li><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>Samurai</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 6-A</span></li><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>Seance</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Shown temporarily closed</span></li><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>Sky Ride - North Station</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 6-E&S</span></li><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>Sky Scraper</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 7-B - shown temporarily closed</span></li><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>Skycoaster</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — X-Venture, grid ref 8-F</span></li><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>Space Scrambler</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 6-G</span></li><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>The Rocket</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 4-B</span></li><li data-cat="ride" data-zone="norththrill"><span class="dot" style="background:#B8302A"></span><strong>Tilt-A-Whirl</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 6-E</span></li></ul></div><div class="legend-section" data-zone="kiddie"><h3>Kiddieland / North Area</h3><ul><li data-cat="amenity" data-zone="kiddie"><span class="dot" style="background:#2E6E6B"></span><strong>ATM</strong> <span class="catlabel">(Amenity / Restroom)</span></li><li data-cat="food" data-zone="kiddie"><span class="dot" style="background:#C97F00"></span><strong>Arby's (North Area)</strong> <span class="catlabel">(Food & Drink)</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>Baby Boats</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 5-N</span></li><li data-cat="food" data-zone="kiddie"><span class="dot" style="background:#C97F00"></span><strong>BeaverTails</strong> <span class="catlabel">(Food & Drink)</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>BomBora</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 3-J</span></li><li data-cat="entertainment" data-zone="kiddie"><span class="dot" style="background:#6E1423"></span><strong>Break A Plate</strong> <span class="catlabel">(Entertainment / Shop)</span><span class="note"> — Novelty/photo stand near entrance</span></li><li data-cat="food" data-zone="kiddie"><span class="dot" style="background:#C97F00"></span><strong>Burger Express</strong> <span class="catlabel">(Food & Drink)</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>Carousel (Merry-Go-Round)</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 6-N</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>Dinosaur Drop</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 4-K</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>Dracula's Castle</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 7-I</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>Flying Tigers</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 4-J</span></li><li data-cat="entertainment" data-zone="kiddie"><span class="dot" style="background:#6E1423"></span><strong>Interactive Water Fountain</strong> <span class="catlabel">(Entertainment / Shop)</span><span class="note"> — Grid ref for area 6-J</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>Jumping Dragon</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 3-J</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>Kontiki</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 4-L</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>Moonraker</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 4-K</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>OdySea</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 4-B</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>Puff the Little Fire Dragon</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 4-N</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>Red Baron</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 4-L</span></li><li data-cat="amenity" data-zone="kiddie"><span class="dot" style="background:#2E6E6B"></span><strong>Restroom (Kiddieland)</strong> <span class="catlabel">(Amenity / Restroom)</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>Scaliwags</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Shown temporarily closed</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>Sky Fighter</strong> <span class="catlabel">(Ride / Attraction)</span></li><li data-cat="food" data-zone="kiddie"><span class="dot" style="background:#C97F00"></span><strong>Subway (North Area)</strong> <span class="catlabel">(Food & Drink)</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>The Bat</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 3-G</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>The Dragonfly</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 3-I</span></li><li data-cat="ride" data-zone="kiddie"><span class="dot" style="background:#B8302A"></span><strong>Tipsy Tea Cups</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 6-C</span></li></ul></div><div class="legend-section" data-zone="beach"><h3>Lagoon-A-Beach</h3><ul><li data-cat="food" data-zone="beach"><span class="dot" style="background:#C97F00"></span><strong>Fliz/Fiiz (Beach)</strong> <span class="catlabel">(Food & Drink)</span></li><li data-cat="food" data-zone="beach"><span class="dot" style="background:#C97F00"></span><strong>Icee (Beach)</strong> <span class="catlabel">(Food & Drink)</span></li><li data-cat="amenity" data-zone="beach"><span class="dot" style="background:#2E6E6B"></span><strong>Lagoon-A-Beach entrance</strong> <span class="catlabel">(Amenity / Restroom)</span></li><li data-cat="food" data-zone="beach"><span class="dot" style="background:#C97F00"></span><strong>Smokin' Eddie's</strong> <span class="catlabel">(Food & Drink)</span><span class="note"> — Chicken strips & fries</span></li><li data-cat="ride" data-zone="beach"><span class="dot" style="background:#B8302A"></span><strong>The Outrigger</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Water slide</span></li><li data-cat="ride" data-zone="beach"><span class="dot" style="background:#B8302A"></span><strong>Wipeout</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Pipeline slide</span></li></ul></div><div class="legend-section" data-zone="terraces"><h3>Terraces & Camping Cabins</h3><ul><li data-cat="lodging" data-zone="terraces"><span class="dot" style="background:#4A6B3A"></span><strong>Birch Terrace</strong> <span class="catlabel">(Lodging / Camping)</span><span class="note"> — Cabin</span></li><li data-cat="lodging" data-zone="terraces"><span class="dot" style="background:#4A6B3A"></span><strong>Cedar Terrace</strong> <span class="catlabel">(Lodging / Camping)</span><span class="note"> — Cabin</span></li><li data-cat="lodging" data-zone="terraces"><span class="dot" style="background:#4A6B3A"></span><strong>Juniper Terrace</strong> <span class="catlabel">(Lodging / Camping)</span><span class="note"> — Cabin</span></li><li data-cat="amenity" data-zone="terraces"><span class="dot" style="background:#2E6E6B"></span><strong>Lagoon Trail trailhead</strong> <span class="catlabel">(Amenity / Restroom)</span></li><li data-cat="ride" data-zone="terraces"><span class="dot" style="background:#B8302A"></span><strong>Rattlesnake Rapids</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 1-O</span></li><li data-cat="amenity" data-zone="terraces"><span class="dot" style="background:#2E6E6B"></span><strong>Terraces Restrooms</strong> <span class="catlabel">(Amenity / Restroom)</span></li><li data-cat="entertainment" data-zone="terraces"><span class="dot" style="background:#6E1423"></span><strong>The District</strong> <span class="catlabel">(Entertainment / Shop)</span><span class="note"> — Appears to be a bar/lounge venue</span></li><li data-cat="ride" data-zone="terraces"><span class="dot" style="background:#B8302A"></span><strong>Time Tinker</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — New 2025 thrill ride, near cabins</span></li></ul></div><div class="legend-section" data-zone="pioneer"><h3>Pioneer Village & Lagoon Lake</h3><ul><li data-cat="food" data-zone="pioneer"><span class="dot" style="background:#C97F00"></span><strong>Fliz Drinks (Pioneer Village)</strong> <span class="catlabel">(Food & Drink)</span></li><li data-cat="food" data-zone="pioneer"><span class="dot" style="background:#C97F00"></span><strong>Grandma Christie's</strong> <span class="catlabel">(Food & Drink)</span><span class="note"> — Tacos</span></li><li data-cat="amenity" data-zone="pioneer"><span class="dot" style="background:#2E6E6B"></span><strong>Lagoon Lake</strong> <span class="catlabel">(Amenity / Restroom)</span><span class="note"> — Body of water, not a ride</span></li><li data-cat="food" data-zone="pioneer"><span class="dot" style="background:#C97F00"></span><strong>Olde Mill (Old Mill Grill)</strong> <span class="catlabel">(Food & Drink)</span></li><li data-cat="food" data-zone="pioneer"><span class="dot" style="background:#C97F00"></span><strong>Pioneer Perk</strong> <span class="catlabel">(Food & Drink)</span><span class="note"> — Coffee stand</span></li><li data-cat="entertainment" data-zone="pioneer"><span class="dot" style="background:#6E1423"></span><strong>Pioneer Photo Gallery</strong> <span class="catlabel">(Entertainment / Shop)</span></li><li data-cat="amenity" data-zone="pioneer"><span class="dot" style="background:#2E6E6B"></span><strong>Pioneer Village entrance</strong> <span class="catlabel">(Amenity / Restroom)</span></li><li data-cat="food" data-zone="pioneer"><span class="dot" style="background:#C97F00"></span><strong>Rattlesnake Grub</strong> <span class="catlabel">(Food & Drink)</span></li></ul></div><div class="legend-section" data-zone="southmid"><h3>South Midway</h3><ul><li data-cat="food" data-zone="southmid"><span class="dot" style="background:#C97F00"></span><strong>Biergarten Restaurant</strong> <span class="catlabel">(Food & Drink)</span></li><li data-cat="ride" data-zone="southmid"><span class="dot" style="background:#B8302A"></span><strong>Colossus: The Fire Dragon</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref ~8</span></li><li data-cat="food" data-zone="southmid"><span class="dot" style="background:#C97F00"></span><strong>Corndog Corner</strong> <span class="catlabel">(Food & Drink)</span></li><li data-cat="ride" data-zone="southmid"><span class="dot" style="background:#B8302A"></span><strong>Lagoon Roller Coaster</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 6-N, 7th oldest coaster in the world</span></li><li data-cat="ride" data-zone="southmid"><span class="dot" style="background:#B8302A"></span><strong>Musik Express</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Shown temporarily closed, grid ref 7-I</span></li><li data-cat="ride" data-zone="southmid"><span class="dot" style="background:#B8302A"></span><strong>Nutcracker</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — New 2026 ride, replaced Cliffhanger</span></li><li data-cat="ride" data-zone="southmid"><span class="dot" style="background:#B8302A"></span><strong>Rock-O-Plane</strong> <span class="catlabel">(Ride / Attraction)</span></li><li data-cat="ride" data-zone="southmid"><span class="dot" style="background:#B8302A"></span><strong>Sky Ride - South Station</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 6-E&S</span></li><li data-cat="amenity" data-zone="southmid"><span class="dot" style="background:#2E6E6B"></span><strong>South Restrooms</strong> <span class="catlabel">(Amenity / Restroom)</span></li><li data-cat="ride" data-zone="southmid"><span class="dot" style="background:#B8302A"></span><strong>The Spider</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 6-D</span></li><li data-cat="ride" data-zone="southmid"><span class="dot" style="background:#B8302A"></span><strong>Tidal Wave</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 5-P</span></li><li data-cat="ride" data-zone="southmid"><span class="dot" style="background:#B8302A"></span><strong>Turn of the Century</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 5-Q</span></li><li data-cat="ride" data-zone="southmid"><span class="dot" style="background:#B8302A"></span><strong>Wicked</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 6-D</span></li><li data-cat="ride" data-zone="southmid"><span class="dot" style="background:#B8302A"></span><strong>Wild Kingdom Train</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Shown TEMPORARILY CLOSED on this map - flag for verification</span></li><li data-cat="ride" data-zone="southmid"><span class="dot" style="background:#B8302A"></span><strong>Wild Mouse</strong> <span class="catlabel">(Ride / Attraction)</span><span class="note"> — Grid ref 6-Q</span></li><li data-cat="food" data-zone="southmid"><span class="dot" style="background:#C97F00"></span><strong>Zeppe's Ice Cream</strong> <span class="catlabel">(Food & Drink)</span></li></ul></div><div class="legend-section" data-zone="rvpark"><h3>RV Park & Campground</h3><ul><li data-cat="lodging" data-zone="rvpark"><span class="dot" style="background:#4A6B3A"></span><strong>Lagoon RV Park & Campground office</strong> <span class="catlabel">(Lodging / Camping)</span></li><li data-cat="lodging" data-zone="rvpark"><span class="dot" style="background:#4A6B3A"></span><strong>RV/camping sites (numbered lots)</strong> <span class="catlabel">(Lodging / Camping)</span><span class="note"> — Not itemized individually - too granular for a legend</span></li></ul></div>
+</div>
+
+<script>
+const filters = document.querySelectorAll('.filters button');
+const pins = document.querySelectorAll('.pin');
+const legendItems = document.querySelectorAll('.legend li');
+
+filters.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filters.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.filter;
+    pins.forEach(p => {
+      p.classList.toggle('dim', f !== 'all' && p.dataset.cat !== f);
+    });
+    legendItems.forEach(li => {
+      li.classList.toggle('dim', f !== 'all' && li.dataset.cat !== f);
+    });
+  });
+});
+
+const tooltip = document.getElementById('tooltip');
+pins.forEach(p => {
+  p.addEventListener('mousemove', e => {
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top = (e.clientY + 10) + 'px';
+    tooltip.textContent = p.dataset.name;
+  });
+  p.addEventListener('mouseleave', () => tooltip.style.display = 'none');
+});
+</script>
+
+</body>
+</html>
