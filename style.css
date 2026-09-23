@@ -193,3 +193,10 @@ footer a:hover { color: #fff; }
 .stats td:first-child { font-weight: 600; color: var(--newport-dark); width: 45%; }
 .related-card a.cover { color: inherit; }
 .related-card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.post figcaption .credit { display: block; font-style: italic; opacity: 0.85; }
+.post figure img { max-height: 520px; object-fit: cover; object-position: center 75%; }
+.photo-grid figure img { aspect-ratio: 3/4; max-height: none; }
+.photo-grid.renderings { grid-template-columns: 1fr 1fr; }
+.photo-grid.renderings figure img { aspect-ratio: auto; object-fit: contain; }
+@media (max-width: 600px) { .photo-grid.renderings { grid-template-columns: 1fr; } }
+.photo-grid.pairs { grid-template-columns: 1fr 1fr; }
